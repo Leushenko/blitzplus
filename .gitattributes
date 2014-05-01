@@ -1,2 +1,30 @@
-*.dsw	eol=crlf
-*.dsp	eol=crlf
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Blitz source files
+*.bb    text eol=crlf
+*.decls text eol=crlf
+*.ipf   text eol=crlf
+
+# Media files
+*.jpg binary
+*.png binary
+*.PNG binary
+*.bmp binary
+*.BMP binary
+*.wav binary
+*.WAV binary
+*.mid binary
+*.MID binary
+*.b3d binary
+*.bo3d binary
+*.md2 binary
+
+# (for now)
+*.obj binary
+*.txt binary
+*.TXT binary
+
+# VS project files
+*.dsw   text eol=crlf
+*.dsp   text eol=crlf
