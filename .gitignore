@@ -16,3 +16,7 @@ _release
 
 fmodapi*
 freeimage*
+
+*.vcproj.*
+*/Debug
+*/Release
