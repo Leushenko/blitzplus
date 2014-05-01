@@ -7,3 +7,12 @@ Debug
 Release
 _release
 
+*.o
+*.zip
+*.dll
+*.exe
+*.so
+*.dylib
+
+fmodapi*
+freeimage*
