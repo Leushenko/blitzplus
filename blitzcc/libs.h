@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+//using namespace std;
 
 #include "linker.h"
 #include "environ.h"
@@ -22,15 +22,15 @@ extern int run_ver;
 extern int dbg_ver;
 
 //openLibs
-extern string home;
+extern std::string home;
 extern Linker *linkerLib;
 extern Runtime *runtimeLib;
 
 //linkLibs
 extern Module *runtimeModule;
 extern Environ *runtimeEnviron;
-extern vector<string> keyWords;
-extern vector<UserFunc> userFuncs;
+extern std::vector<std::string> keyWords;
+extern std::vector<UserFunc> userFuncs;
 
 const char *openLibs( bool debug );
 

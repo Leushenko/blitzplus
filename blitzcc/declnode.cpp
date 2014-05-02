@@ -139,7 +139,7 @@ void FuncDeclNode::translate( Codegen *g ){
 	TNode *t=createVars( sem_env );
 	if( t ) g->code( t );
 	if( g->debug ){
-		string t=genLabel();
+		std::string t=genLabel();
 		g->s_data( ident,t );
 		g->code( call( "__bbDebugEnter",local(0),iconst((int)sem_env),global(t) ) );
 	}
@@ -186,7 +186,7 @@ void StructDeclNode::translate( Codegen *g ){
 	//used and free lists for type
 	int k;
 	for( k=0;k<2;++k ){
-		string lab=genLabel();
+		std::string lab=genLabel();
 		g->i_data( 0,lab );	//fields
 		g->p_data( lab );	//next
 		g->p_data( lab );	//prev
@@ -201,7 +201,7 @@ void StructDeclNode::translate( Codegen *g ){
 	for( k=0;k<sem_type->fields->size();++k ){
 		Decl *field=sem_type->fields->decls[k];
 		Type *type=field->type;
-		string t;
+		std::string t;
 		if( type==Type::int_type ) t="__bbIntType";
 		else if( type==Type::float_type ) t="__bbFltType";
 		else if( type==Type::string_type ) t="__bbStrType";
@@ -250,7 +250,7 @@ void VectorDeclNode::proto( DeclSeq *d,Environ *env ){
 
 	Type *ty=tagType( tag,env );if( !ty ) ty=Type::int_type;
 
-	vector<int> sizes;
+	std::vector<int> sizes;
 	for( int k=0;k<exprs->size();++k ){
 		ExprNode *e=exprs->exprs[k]=exprs->exprs[k]->semant( env );
 		ConstNode *c=e->constNode();
@@ -259,7 +259,7 @@ void VectorDeclNode::proto( DeclSeq *d,Environ *env ){
 		if( n<0 ) ex( "Blitz array sizes must not be negative" );
 		sizes.push_back( n+1 );
 	}
-	string label=genLabel();
+	std::string label=genLabel();
 	sem_type=d_new VectorType( label,ty,sizes );
 	if( !d->insertDecl( ident,sem_type,kind ) ){
 		delete sem_type;ex( "Duplicate identifier" );
@@ -275,7 +275,7 @@ void VectorDeclNode::translate( Codegen *g ){
 	int sz=1;
 	for( int k=0;k<v->sizes.size();++k ) sz*=v->sizes[k];
 	g->i_data( sz );
-	string t;
+	std::string t;
 	Type *type=v->elementType;
 	if( type==Type::int_type ) t="__bbIntType";
 	else if( type==Type::float_type ) t="__bbFltType";

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-using namespace std;
+//using namespace std;
 
 #ifdef MEMDEBUG
 
@@ -45,8 +45,8 @@ static void check( Mem *m ){
 	if( m->tag!='DNEW' ){
 		MessageBox( GetDesktopWindow(),"mem_check: pre_tag!='DNEW'","Memory error",MB_OK|MB_ICONWARNING );
 		if( m->tag=='NDWE' ){
-			string t="Probable double delete";
-			t+="- d_new file: "+string(m->file)+" line:"+itoa(m->line);
+			std::string t="Probable double delete";
+			t+="- d_new file: "+std::string(m->file)+" line:"+itoa(m->line);
 			MessageBox( GetDesktopWindow(),t.c_str(),"Memory error",MB_OK|MB_ICONWARNING );
 		}
 		ExitProcess( 0 );
@@ -54,7 +54,7 @@ static void check( Mem *m ){
 	int *t=(int*)( (char*)(m+1)+m->size );
 	if( *t!='dnew' ){
 		MessageBox( GetDesktopWindow(),"mem_check: post_tag!='dnew'","Memory error",MB_OK|MB_ICONWARNING );
-		string t="Probable memory overwrite - d_new file: "+string(m->file)+" line:"+itoa(m->line);
+		std::string t="Probable memory overwrite - d_new file: "+std::string(m->file)+" line:"+itoa(m->line);
 		MessageBox( GetDesktopWindow(),t.c_str(),"Memory error",MB_OK|MB_ICONWARNING );
 		ExitProcess( 0 );
 	}
@@ -92,7 +92,7 @@ void trackmem( bool enable ){
 	}
 }
 
-void checkmem( ostream &out ){
+void checkmem( std::ostream &out ){
 	init();
 	Mem *m,*next;
 	int sum=0,usum=0,xsum=0;
@@ -100,7 +100,7 @@ void checkmem( ostream &out ){
 		check( m );
 		next=m->next;
 		if( m->line ){
-			out<<m->file<<" line:"<<m->line<<" "<<m->size<<" bytes"<<endl;
+			out<<m->file<<" line:"<<m->line<<" "<<m->size<<" bytes"<<std::endl;
 			sum+=m->size;
 		}else{
 			usum+=m->size;
@@ -110,10 +110,10 @@ void checkmem( ostream &out ){
 		check( m );
 		xsum+=m->size;
 	}
-	out<<"Tracked blitz mem in use:"<<sum<<endl;
-	out<<"Tracked other mem in use:"<<usum<<endl;
-	out<<"Untracked mem in use:"<<xsum<<endl;
-	out<<"Total mem in use:"<<(sum+usum+xsum)<<endl;
+	out<<"Tracked blitz mem in use:"<<sum<<std::endl;
+	out<<"Tracked other mem in use:"<<usum<<std::endl;
+	out<<"Untracked mem in use:"<<xsum<<std::endl;
+	out<<"Total mem in use:"<<(sum+usum+xsum)<<std::endl;
 }
 
 void * _cdecl operator new( size_t size ){ return op_new( size ); }
@@ -130,25 +130,25 @@ void _cdecl operator delete[]( void *q,const char *file,int line ){ op_delete( q
 void trackmem( bool enable ){
 }
 
-void checkmem( ostream &out ){
+void checkmem( std::ostream &out ){
 }
 
 #endif
 
-int atoi( const string &s ){
+int atoi( const std::string &s ){
 	return atoi( s.c_str() );
 }
 
-double atof( const string &s ){
+double atof( const std::string &s ){
 	return atof( s.c_str() );
 }
 
-string itoa( int n ){
+std::string itoa( int n ){
 	char buff[32];itoa( n,buff,10 );
-	return string( buff );
+	return std::string( buff );
 }
 
-static int _finite( double n ){		// definition: exponent anything but 2047.
+static int _finite_local(_In_ double n ){		// definition: exponent anything but 2047.
 
 	int e;					// 11 bit exponent
 	const int eMax = 2047;	// 0x7ff, all bits = 1	
@@ -161,7 +161,7 @@ static int _finite( double n ){		// definition: exponent anything but 2047.
 	return e != eMax;
 }
 
-static int _isnan( double n ){		// definition: exponent 2047, nonzero fraction.
+static int _isnan_local(_In_ double n ){		// definition: exponent 2047, nonzero fraction.
 
 	int e;					// 11 bit exponent
 	const int eMax = 2047;	// 0x7ff, all bits = 1	
@@ -184,17 +184,17 @@ static int _isnan( double n ){		// definition: exponent 2047, nonzero fraction.
 /////////////
 //By FLOYD!//
 /////////////
-string ftoa( float n ){
+std::string ftoa( float n ){
 
 	static const int digits=6;
 
 	int eNeg = -4, ePos = 8;	// limits for e notation.
 
 	char buffer[50]; // from MSDN example, 25 would probably suffice
-	string t;
+	std::string t;
 	int dec, sign;
 
-	if ( _finite( n ) ){
+	if ( _finite_local( n ) ){
 
 //		if ( digits < 1 ) digits = 1;	// less than one digit is nonsense
 //		if ( digits > 8 ) digits = 8;	// practical maximum for float
@@ -213,7 +213,7 @@ string ftoa( float n ){
 	
 		if ( dec <= 0 ){
 
-			t = "0." + string( -dec, '0' ) + t;
+			t = "0." + std::string( -dec, '0' ) + t;
 			dec = 1;	// new location for decimal point
 
 		}
@@ -224,7 +224,7 @@ string ftoa( float n ){
 		}
 		else{
 
-			t = t + string( dec - digits, '0' ) + ".0";
+			t = t + std::string( dec - digits, '0' ) + ".0";
 			dec += dec - digits;
 
 		}
@@ -233,13 +233,13 @@ string ftoa( float n ){
 
 		int dp1 = dec + 1, p = t.length();	
 		while( --p > dp1 && t[p] == '0' );
-		t = string( t, 0, ++p );
+		t = std::string( t, 0, ++p );
 
 		return sign ? "-" + t : t;
 
 	}	// end of finite case
 
-	if ( _isnan( n ) )	return "NaN";
+	if ( _isnan_local( n ) )	return "NaN";
 	if ( n > 0.0 )		return "Infinity";
 	if ( n < 0.0 )		return "-Infinity";
 
@@ -247,7 +247,7 @@ string ftoa( float n ){
 }
 
 /*
-string ftoa( float n ){
+std::string ftoa( float n ){
 
 	static const float min=.000001f,max=9999999.0f;
 
@@ -257,7 +257,7 @@ string ftoa( float n ){
 
 	if( e==0xff && f ) return "NAN";
 
-	string t;
+	std::string t;
 	int s=(i>>31)&0x01;
 
 	if( e==0xff ){
@@ -268,11 +268,11 @@ string ftoa( float n ){
 		int dec,sgn;
 		t=_fcvt( fabs(n),6,&dec,&sgn );
 		if( dec<=0 ){
-			t="0."+string( -dec,'0' )+t;
+			t="0."+std::string( -dec,'0' )+t;
 		}else if( dec<t.size() ){
 			t=t.substr( 0,dec )+"."+t.substr( dec );
 		}else{
-			t=t+string( '0',dec-t.size() )+".000000";
+			t=t+std::string( '0',dec-t.size() )+".000000";
 		}
 	}else{
 		char buff[32];
@@ -283,36 +283,36 @@ string ftoa( float n ){
 }
 */
 
-string tolower( const string &s ){
-	string t=s;
+std::string tolower( const std::string &s ){
+	std::string t=s;
 	for( int k=0;k<t.size();++k ) t[k]=tolower(t[k]);
 	return t;
 }
 
-string toupper( const string &s ){
-	string t=s;
+std::string toupper( const std::string &s ){
+	std::string t=s;
 	for( int k=0;k<t.size();++k ) t[k]=toupper(t[k]);
 	return t;
 }
 
-string fullfilename( const string &t ){
+std::string fullfilename( const std::string &t ){
 	char buff[MAX_PATH+1],*p;
 	GetFullPathName( t.c_str(),MAX_PATH,buff,&p );
-	return string(buff);
+	return std::string(buff);
 }
 
-string filenamepath( const string &t ){
+std::string filenamepath( const std::string &t ){
 	char buff[MAX_PATH+1],*p;
 	GetFullPathName( t.c_str(),MAX_PATH,buff,&p );
 	if( !p ) return "";
-	*p=0;return string(buff);
+	*p=0;return std::string(buff);
 }
 
-string filenamefile( const string &t ){
+std::string filenamefile( const std::string &t ){
 	char buff[MAX_PATH+1],*p;
 	GetFullPathName( t.c_str(),MAX_PATH,buff,&p );
 	if( !p ) return "";
-	return string( p );
+	return std::string( p );
 }
 
 const int MIN_SIZE=256;

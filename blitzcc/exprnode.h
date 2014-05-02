@@ -4,7 +4,7 @@
 
 #include "node.h"
 
-struct ConstNode;	//is constant int,float or string
+struct ConstNode;	//is constant int,float or std::string
 
 struct ExprNode : public Node{
 	Type *sem_type;
@@ -20,7 +20,7 @@ struct ExprNode : public Node{
 };
 
 struct ExprSeqNode : public Node{
-	vector<ExprNode*> exprs;
+	std::vector<ExprNode*> exprs;
 	~ExprSeqNode(){ for( ;exprs.size();exprs.pop_back() ) delete exprs.back(); }
 	void push_back( ExprNode *e ){ exprs.push_back( e ); }
 	int  size(){ return exprs.size(); }
@@ -42,10 +42,10 @@ struct CastNode : public ExprNode{
 };
 
 struct CallNode : public ExprNode{
-	string ident,tag;
+	std::string ident,tag;
 	ExprSeqNode *exprs;
 	Decl *sem_decl;
-	CallNode( const string &i,const string &t,ExprSeqNode *e ):ident(i),tag(t),exprs(e){}
+	CallNode( const std::string &i,const std::string &t,ExprSeqNode *e ):ident(i),tag(t),exprs(e){}
 	~CallNode(){ delete exprs; }
 	ExprNode *semant( Environ *e );
 	TNode *translate( Codegen *g );
@@ -64,7 +64,7 @@ struct ConstNode : public ExprNode{
 	ConstNode *constNode(){ return this; }
 	virtual int intValue()=0;
 	virtual float floatValue()=0;
-	virtual string stringValue()=0;
+	virtual std::string stringValue()=0;
 };
 
 struct IntConstNode : public ConstNode{
@@ -73,7 +73,7 @@ struct IntConstNode : public ConstNode{
 	TNode *translate( Codegen *g );
 	int intValue();
 	float floatValue();
-	string stringValue();
+	std::string stringValue();
 };
 
 struct FloatConstNode : public ConstNode{
@@ -82,16 +82,16 @@ struct FloatConstNode : public ConstNode{
 	TNode *translate( Codegen *g );
 	int intValue();
 	float floatValue();
-	string stringValue();
+	std::string stringValue();
 };
 
 struct StringConstNode : public ConstNode{
-	string value;
-	StringConstNode( const string &s );
+	std::string value;
+	StringConstNode( const std::string &s );
 	TNode *translate( Codegen *g );
 	int intValue();
 	float floatValue();
-	string stringValue();
+	std::string stringValue();
 };
 
 struct UniExprNode : public ExprNode{
@@ -132,22 +132,22 @@ struct RelExprNode : public ExprNode{
 };
 
 struct NewNode : public ExprNode{
-	string ident;
-	NewNode( const string &i ):ident(i){}
+	std::string ident;
+	NewNode( const std::string &i ):ident(i){}
 	ExprNode *semant( Environ *e );
 	TNode *translate( Codegen *g );
 };
 
 struct FirstNode : public ExprNode{
-	string ident;
-	FirstNode( const string &i ):ident(i){}
+	std::string ident;
+	FirstNode( const std::string &i ):ident(i){}
 	ExprNode *semant( Environ *e );
 	TNode *translate( Codegen *g );
 };
 
 struct LastNode : public ExprNode{
-	string ident;
-	LastNode( const string &i ):ident(i){}
+	std::string ident;
+	LastNode( const std::string &i ):ident(i){}
 	ExprNode *semant( Environ *e );
 	TNode *translate( Codegen *g );
 };
@@ -175,8 +175,8 @@ struct NullNode : public ExprNode{
 
 struct ObjectCastNode : public ExprNode{
 	ExprNode *expr;
-	string type_ident;
-	ObjectCastNode( ExprNode *e,const string &t ):expr(e),type_ident(t){}
+	std::string type_ident;
+	ObjectCastNode( ExprNode *e,const std::string &t ):expr(e),type_ident(t){}
 	~ObjectCastNode(){ delete expr; }
 	ExprNode *semant( Environ *e );
 	TNode *translate( Codegen *g );

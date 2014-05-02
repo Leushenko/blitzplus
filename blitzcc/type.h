@@ -47,10 +47,10 @@ struct ArrayType : public Type{
 };
 
 struct StructType : public Type{
-	string ident;
+	std::string ident;
 	DeclSeq *fields;
-	StructType( const string &i ):ident(i),fields(0){}
-	StructType( const string &i,DeclSeq *f ):ident(i),fields( f ){}
+	StructType( const std::string &i ):ident(i),fields(0){}
+	StructType( const std::string &i,DeclSeq *f ):ident(i),fields( f ){}
 	~StructType(){ delete fields; }
 	StructType *structType(){ return this; }
 	virtual bool canCastTo( Type *t );
@@ -60,18 +60,18 @@ struct ConstType : public Type{
 	Type *valueType;
 	int intValue;
 	float floatValue;
-	string stringValue;
+	std::string stringValue;
 	ConstType( int n ):intValue(n),valueType(Type::int_type){}
 	ConstType( float n ):floatValue(n),valueType(Type::float_type){}
-	ConstType( const string &n ):stringValue(n),valueType(Type::string_type){}
+	ConstType( const std::string &n ):stringValue(n),valueType(Type::string_type){}
 	ConstType *constType(){ return this; }
 };
 
 struct VectorType : public Type{
-	string label;
+	std::string label;
 	Type *elementType;
-	vector<int> sizes;
-	VectorType( const string &l,Type *t,const vector<int> &szs ):label(l),elementType(t),sizes(szs){}
+	std::vector<int> sizes;
+	VectorType( const std::string &l,Type *t,const std::vector<int> &szs ):label(l),elementType(t),sizes(szs){}
 	VectorType *vectorType(){ return this; }
 	virtual bool canCastTo( Type *t );
 };

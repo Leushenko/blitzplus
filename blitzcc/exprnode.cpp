@@ -223,7 +223,7 @@ float IntConstNode::floatValue(){
 	return value;
 }
 
-string IntConstNode::stringValue(){
+std::string IntConstNode::stringValue(){
 	return itoa( value );
 }
 
@@ -254,19 +254,19 @@ float FloatConstNode::floatValue(){
 	return value;
 }
 
-string FloatConstNode::stringValue(){
+std::string FloatConstNode::stringValue(){
 	return ftoa( value );
 }
 
 /////////////////////
 // String constant //
 /////////////////////
-StringConstNode::StringConstNode( const string &s ):value(s){
+StringConstNode::StringConstNode( const std::string &s ):value(s){
 	sem_type=Type::string_type;
 }
 
 TNode *StringConstNode::translate( Codegen *g ){
-	string lab=genLabel();
+	std::string lab=genLabel();
 
 	g->i_data( 0,lab );
 	g->s_data( value );
@@ -283,7 +283,7 @@ float StringConstNode::floatValue(){
 	return (float)atof( value );
 }
 
-string StringConstNode::stringValue(){
+std::string StringConstNode::stringValue(){
 	return value;
 }
 
@@ -383,7 +383,7 @@ ExprNode *ArithExprNode::semant( Environ *e ){
 		ex( "Arithmetic operator cannot be applied to custom type objects" );
 	}
 	if( lhs->sem_type==Type::string_type || rhs->sem_type==Type::string_type ){
-		//one side is a string - only + operator...
+		//one side is a std::string - only + operator...
 		if( op!='+' ) ex( "Operator cannot be applied to strings" );
 		sem_type=Type::string_type;
 	}else if( op=='^' || lhs->sem_type==Type::float_type || rhs->sem_type==Type::float_type ){

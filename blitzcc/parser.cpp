@@ -18,7 +18,7 @@ static bool isTerm( int c ){ return c==':' || c=='\n'; }
 Parser::Parser( Toker &t ):toker(&t),main_toker(&t){
 }
 
-ProgNode *Parser::parse( const string &main ){
+ProgNode *Parser::parse( const std::string &main ){
 
 	incfile=main;
 
@@ -39,11 +39,11 @@ ProgNode *Parser::parse( const string &main ){
 	return d_new ProgNode( consts,structs,funcs,datas,stmts );
 }
 
-void Parser::ex( const string &s ){
+void Parser::ex( const std::string &s ){
 	throw Ex( s,toker->pos(),incfile );
 }
 
-void Parser::exp( const string &s ){
+void Parser::exp( const std::string &s ){
 	switch( toker->curr() ){
 	case NEXT:ex( "'Next' without 'For'" );
 	case WEND:ex( "'Wend' without 'While'" );
@@ -58,15 +58,15 @@ void Parser::exp( const string &s ){
 	ex( "Expecting "+s );
 }
 
-string Parser::parseIdent(){
+std::string Parser::parseIdent(){
 	if( toker->curr()!=IDENT ) exp( "identifier" );
-	string t=toker->text();
+	std::string t=toker->text();
 	toker->next();
 	return t;
 }
 
 void Parser::parseChar( int c ){
-	if( toker->curr()!=c ) exp( string( "'" )+char(c)+string( "'" ) );
+	if( toker->curr()!=c ) exp( std::string( "'" )+char(c)+std::string( "'" ) );
 	toker->next();
 }
 
@@ -93,7 +93,7 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 		case INCLUDE:
 			{
 				if( toker->next()!=STRINGCONST ) exp( "include filename" );
-				string inc=toker->text();toker->next();
+				std::string inc=toker->text();toker->next();
 				inc=inc.substr( 1,inc.size()-2 );
 
 				//WIN32 KLUDGE//
@@ -103,12 +103,12 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 
 				if( included.find( inc )!=included.end() ) break;
 
-				ifstream i_stream( inc.c_str() );
+				std::ifstream i_stream(inc.c_str());
 				if( !i_stream.good() ) ex( "Unable to open include file" );
 
 				Toker i_toker( i_stream );
 
-				string t_inc=incfile;incfile=inc;
+				std::string t_inc=incfile;incfile=inc;
 				Toker *t_toker=toker;toker=&i_toker;
 
 				included.insert( incfile );
@@ -124,8 +124,8 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 			break;
 		case IDENT:
 			{
-				string ident=toker->text();
-				toker->next();string tag=parseTypeTag();
+				std::string ident=toker->text();
+				toker->next();std::string tag=parseTypeTag();
 				if( arrayDecls.find(ident)==arrayDecls.end() 
 					&& toker->curr()!='=' && toker->curr()!='\\' && toker->curr()!='[' ){
 					//must be a function
@@ -221,7 +221,7 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 				if( toker->curr()!='=' ) exp( "variable assignment" );
 				if( toker->next()==EACH ){
 					toker->next();
-					string ident=parseIdent();
+					std::string ident=parseIdent();
 					stmts=parseStmtSeq( STMTS_BLOCK );
 					int pos=toker->pos();
 					if( toker->curr()!=NEXT ) exp( "'Next'" );
@@ -251,12 +251,12 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 			break;
 		case GOTO:
 			{
-				toker->next();string t=parseIdent();result=d_new GotoNode( t );
+				toker->next();std::string t=parseIdent();result=d_new GotoNode( t );
 			}
 			break;
 		case GOSUB:
 			{
-				toker->next();string t=parseIdent();result=d_new GosubNode( t );
+				toker->next();std::string t=parseIdent();result=d_new GosubNode( t );
 			}
 			break;
 		case RETURN:
@@ -267,7 +267,7 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 		case BBDELETE:
 			{
 				if( toker->next()==EACH ){
-					toker->next();string t=parseIdent();
+					toker->next();std::string t=parseIdent();
 					result=d_new DeleteEachNode( t );
 				}else{
 					ExprNode *expr=parseExpr( false );
@@ -349,7 +349,7 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 			break;
 		case '.':
 			{
-				toker->next();string t=parseIdent();
+				toker->next();std::string t=parseIdent();
 				result=d_new LabelNode( t,datas->size() );
 			}
 			break;
@@ -364,7 +364,7 @@ void Parser::parseStmtSeq( StmtSeqNode *stmts,int scope ){
 	}
 }
 
-string Parser::parseTypeTag(){
+std::string Parser::parseTypeTag(){
 	switch( toker->curr() ){
 	case '%':toker->next();return "%";
 	case '#':toker->next();return "#";
@@ -375,12 +375,12 @@ string Parser::parseTypeTag(){
 }
 
 VarNode *Parser::parseVar(){
-	string ident=parseIdent();
-	string tag=parseTypeTag();
+	std::string ident=parseIdent();
+	std::string tag=parseTypeTag();
 	return parseVar( ident,tag );
 }
 
-VarNode *Parser::parseVar( const string &ident,const string &tag ){
+VarNode *Parser::parseVar( const std::string &ident,const std::string &tag ){
 	a_ptr<VarNode> var;
 	if( toker->curr()=='(' ){
 		toker->next();
@@ -393,8 +393,8 @@ VarNode *Parser::parseVar( const string &ident,const string &tag ){
 	for(;;){
 		if( toker->curr()=='\\' ){
 			toker->next();
-			string ident=parseIdent();
-			string tag=parseTypeTag();
+			std::string ident=parseIdent();
+			std::string tag=parseTypeTag();
 			ExprNode *expr=d_new VarExprNode( var.release() );
 			var=d_new FieldVarNode( expr,ident,tag );
 		}else if( toker->curr()=='[' ){
@@ -413,8 +413,8 @@ VarNode *Parser::parseVar( const string &ident,const string &tag ){
 
 DeclNode *Parser::parseVarDecl( int kind,bool constant ){
 	int pos=toker->pos();
-	string ident=parseIdent();
-	string tag=parseTypeTag();
+	std::string ident=parseIdent();
+	std::string tag=parseTypeTag();
 	DeclNode *d;
 	if( toker->curr()=='[' ){
 		if( constant ) ex( "Blitz arrays may not be constant" );
@@ -436,8 +436,8 @@ DeclNode *Parser::parseVarDecl( int kind,bool constant ){
 
 DimNode *Parser::parseArrayDecl(){
 	int pos=toker->pos();
-	string ident=parseIdent();
-	string tag=parseTypeTag();
+	std::string ident=parseIdent();
+	std::string tag=parseTypeTag();
 	if( toker->curr()!='(' ) exp( "'('" );
 	toker->next();a_ptr<ExprSeqNode> exprs( parseExprSeq() );
 	if( toker->curr()!=')' ) exp( "')'" );
@@ -451,8 +451,8 @@ DimNode *Parser::parseArrayDecl(){
 
 DeclNode *Parser::parseFuncDecl(){
 	int pos=toker->pos();
-	string ident=parseIdent();
-	string tag=parseTypeTag();
+	std::string ident=parseIdent();
+	std::string tag=parseTypeTag();
 	if( toker->curr()!='(' ) exp( "'('" );
 	a_ptr<DeclSeqNode> params( d_new DeclSeqNode() );
 	if( toker->next()!=')' ){
@@ -475,7 +475,7 @@ DeclNode *Parser::parseFuncDecl(){
 
 DeclNode *Parser::parseStructDecl(){
 	int pos=toker->pos();
-	string ident=parseIdent();
+	std::string ident=parseIdent();
 	while( toker->curr()=='\n' ) toker->next();
 	a_ptr<DeclSeqNode> fields( d_new DeclSeqNode() );
 	while( toker->curr()==FIELD ){
@@ -614,7 +614,7 @@ ExprNode *Parser::parseExpr6( bool opt ){
 ExprNode *Parser::parseUniExpr( bool opt ){
 
 	ExprNode *result=0;
-	string t;
+	std::string t;
 
 	int c=toker->curr();
 	switch( c ){
@@ -672,7 +672,7 @@ ExprNode *Parser::parseUniExpr( bool opt ){
 ExprNode *Parser::parsePrimary( bool opt ){
 
 	a_ptr<ExprNode> expr;
-	string t,ident,tag;
+	std::string t,ident,tag;
 	ExprNode *result=0;
 	int n,k;
 

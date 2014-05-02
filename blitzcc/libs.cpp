@@ -8,14 +8,14 @@ int lnk_ver;
 int run_ver;
 int dbg_ver;
 
-string home;
+std::string home;
 Linker *linkerLib;
 Runtime *runtimeLib;
 
 Module *runtimeModule;
 Environ *runtimeEnviron;
-vector<string> keyWords;
-vector<UserFunc> userFuncs;
+std::vector<std::string> keyWords;
+std::vector<UserFunc> userFuncs;
 
 static HMODULE linkerHMOD,runtimeHMOD;
 
@@ -29,9 +29,9 @@ static Type *typeof( int c ){
 }
 
 static int curr;
-static string text;
+static std::string text;
 
-static int next( istream &in ){
+static int next( std::istream &in ){
 
 	text="";
 
@@ -62,7 +62,7 @@ static const char *linkRuntime(){
 
 	while( const char *sym=runtimeLib->nextSym() ){
 
-		string s( sym );
+		std::string s( sym );
 
 		int pc=runtimeLib->symValue(sym);
 
@@ -75,26 +75,26 @@ static const char *linkRuntime(){
 		keyWords.push_back( s );
 
 		//global!
-		int start=0,end;
+		int start = 0, end; unsigned int k;
 		Type *t=Type::void_type;
 		if( !isalpha( s[0] ) ){ start=1;t=typeof( s[0] ); }
-		for( int k=1;k<s.size();++k ){
+		for( k=1;k<s.size();++k ){
 			if( !isalnum( s[k] ) && s[k]!='_' ) break;
 		}
 		end=k;
 		DeclSeq *params=d_new DeclSeq();
-		string n=s.substr( start,end-start );
+		std::string n=s.substr( start,end-start );
 		while( k<s.size() ){
 			Type *t=typeof(s[k++]);
 			int from=k;
 			for( ;isalnum(s[k])||s[k]=='_';++k ){}
-			string str=s.substr( from,k-from );
+			std::string str=s.substr( from,k-from );
 			ConstType *defType=0;
 			if( s[k]=='=' ){
 				int from=++k;
 				if( s[k]=='\"' ){
 					for( ++k;s[k]!='\"';++k ){}
-					string t=s.substr( from+1,k-from-1 );
+					std::string t=s.substr( from+1,k-from-1 );
 					defType=d_new ConstType( t );++k;
 				}else{
 					if( s[k]=='-' ) ++k;
@@ -119,67 +119,67 @@ static const char *linkRuntime(){
 	return 0;
 }
 
-static set<string> _ulibkws;
+static std::set<std::string> _ulibkws;
 
-static const char *loadUserLib( const string &userlib ){
+static const char *loadUserLib( const std::string &userlib ){
 
-	string t=home+"/userlibs/"+userlib;
+	std::string t=home+"/userlibs/"+userlib;
 
-	string lib="";
-	ifstream in(t.c_str());
+	std::string lib="";
+	std::ifstream in(t.c_str());
 
-	next(in);
+	::next(in);
 	while( curr ){
 
 		if( curr=='.' ){
 
-			if( next(in)!=-1 ) return "expecting identifier after '.'";
+			if( ::next(in)!=-1 ) return "expecting identifier after '.'";
 
 			if( text=="lib" ){
-				if( next(in)!=-2 ) return "expecting string after lib directive";
+				if( ::next(in)!=-2 ) return "expecting std::string after lib directive";
 				lib=text;
 
 			}else{
 				return "unknown decl directive";
 			}
-			next( in );
+			::next( in );
 
 		}else if( curr==-1 ){
 
 			if( !lib.size() ) return "function decl without lib directive";
 
-			string id=text;
-			string lower_id=tolower(id);
+			std::string id=text;
+			std::string lower_id=tolower(id);
 
 			if( _ulibkws.count( lower_id ) ) return "duplicate identifier";
 			_ulibkws.insert( lower_id );
 
 			Type *ty=0;
-			switch( next(in) ){
+			switch( ::next(in) ){
 			case '%':ty=Type::int_type;break;
 			case '#':ty=Type::float_type;break;
 			case '$':ty=Type::string_type;break;
 			}
-			if( ty ) next(in);
+			if( ty ) ::next(in);
 			else ty=Type::void_type;
 
 			DeclSeq *params=d_new DeclSeq();
 
 			if( curr!='(' ) return "expecting '(' after function identifier";
-			next(in);
+			::next(in);
 			if( curr!=')' ){
 				for(;;){
 					if( curr!=-1 ) break;
-					string arg=text;
+					std::string arg=text;
 
 					Type *ty=0;
-					switch( next(in) ){
+					switch( ::next(in) ){
 					case '%':ty=Type::int_type;break;
 					case '#':ty=Type::float_type;break;
 					case '$':ty=Type::string_type;break;
 					case '*':ty=Type::null_type;break;
 					}
-					if( ty ) next(in);
+					if( ty ) ::next(in);
 					else ty=Type::int_type;
 
 					ConstType *defType=0;
@@ -187,7 +187,7 @@ static const char *loadUserLib( const string &userlib ){
 					Decl *d=params->insertDecl( arg,ty,DECL_PARAM,defType );
 
 					if( curr!=',' ) break;
-					next(in);
+					::next(in);
 				}
 			}
 			if( curr!=')' ) return "expecting ')' after function decl";
@@ -198,11 +198,11 @@ static const char *loadUserLib( const string &userlib ){
 
 			runtimeEnviron->funcDecls->insertDecl( lower_id,fn,DECL_FUNC );
 
-			if( next(in)==':' ){	//real name?
-				next(in);
-				if( curr!=-1 && curr!=-2 ) return "expecting identifier or string after alias";
+			if( ::next(in)==':' ){	//real name?
+				::next(in);
+				if( curr!=-1 && curr!=-2 ) return "expecting identifier or std::string after alias";
 				id=text;
-				next(in);
+				::next(in);
 			}
 
 			userFuncs.push_back( UserFunc( lower_id,id,lib ) );
@@ -243,7 +243,7 @@ const char *openLibs( bool debug ){
 	
 	char *p=getenv( "blitzpath" );
 	if( !p ) return "Can't find blitzpath environment variable";
-	home=string(p);
+	home=std::string(p);
 
 	linkerHMOD=LoadLibrary( (home+"/bin/linker.dll").c_str() );
 	if( !linkerHMOD ) return "Unable to open linker.dll";
@@ -253,7 +253,7 @@ const char *openLibs( bool debug ){
 	if( !gl ) return "Error in linker.dll";
 	linkerLib=gl();
 
-	string rt=home+"/bin/runtime";
+	std::string rt=home+"/bin/runtime";
 	if( debug ) rt+="_dbg.dll";
 	else rt+=".dll";
 
