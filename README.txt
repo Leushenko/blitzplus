@@ -1,3 +1,20 @@
+
+WIP converting BlitzPlus from MSVC 6 to GCC
+-------------------------------------------
+
+Current status: blitzcc and linker building with VS 2013
+
+Roadmap:
+- get basics building with VS 2013
+- analyse dependencies
+- port structure to new GCC project
+- replace MFC with wxWidgets
+- replace graphics system with SDL
+- ...
+
+
+-------------------------------------------
+
 BlitzPlus source release!
 
 Workspace and project files are in MSVC 6.0 format.
